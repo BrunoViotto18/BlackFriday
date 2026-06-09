@@ -102,22 +102,27 @@ def main() -> None:
     balancer = SMOTE(random_state=RANDOM_STATE)
     X_balanced, Y_balanced = balancer.fit_resample(X_train, Y_train)
 
-    hist_gradient_parameter_map = {
-        "learning_rate": [0.01, 0.05, 0.1],
-        "max_iter": [100, 200, 300],
-        "max_leaf_nodes": [15, 31, 63],
-        "max_depth": [None, 5, 10, 20],
-        "min_samples_leaf": [10, 20, 50],
-        "l2_regularization": [0.0, 0.01, 0.1, 1.0],
+    n_estimators = [int(x) for x in np.linspace(start=10, stop=100, num=10)]
+    criterion = ["gini", "entropy"]
+    min_samples_split = [int(x) for x in np.linspace(start=2, stop=10, num=2)]
+    max_depth = [int(x) for x in np.linspace(start=10, stop=100, num=20)]
+    max_features = ["sqrt", "log2"]
+
+    forest_parameter_map = {
+        "n_estimators": n_estimators,
+        "criterion": criterion,
+        "min_samples_split": min_samples_split,
+        "max_depth": max_depth,
+        "max_features": max_features,
     }
 
     models = [
         (
-            "Hist Gradient Boosting Classifier",
-            HistGradientBoostingClassifier(random_state=RANDOM_STATE),
-            hist_gradient_parameter_map,
+            "Random Forest",
+            RandomForestClassifier(random_state=RANDOM_STATE),
+            forest_parameter_map,
             MODEL_PATH,
-        )
+        ),
     ]
 
     from pprint import pprint
@@ -141,22 +146,6 @@ def main() -> None:
         pprint(hyper_parameters.best_params_)
 
         model = hyper_parameters.best_estimator_
-
-        scoring = ["accuracy", "f1_macro"]
-        scores_cross = cross_validate(
-            model,
-            X_normalized,
-            np.array(Y),
-            scoring=scoring,
-            n_jobs=1,
-            cv=10,
-            verbose=1,
-        )
-
-        print("Resultado do cross vall:", scores_cross)
-        print("Acurácia:", scores_cross["test_accuracy"].mean())
-        print("F1 Score:", scores_cross["test_f1_macro"].mean())
-        print()
 
         model = model.fit(X_balanced, Y_balanced)
 

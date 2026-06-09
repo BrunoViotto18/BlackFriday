@@ -145,22 +145,6 @@ def main() -> None:
 
         model = hyper_parameters.best_estimator_
 
-        scoring = ["accuracy", "f1_macro"]
-        scores_cross = cross_validate(
-            model,
-            X_normalized,
-            np.array(Y),
-            scoring=scoring,
-            n_jobs=1,
-            cv=10,
-            verbose=1,
-        )
-
-        print("Resultado do cross vall:", scores_cross)
-        print("Acurácia:", scores_cross["test_accuracy"].mean())
-        print("F1 Score:", scores_cross["test_f1_macro"].mean())
-        print()
-
         model = model.fit(X_balanced, Y_balanced)
 
         with open(model_path, "wb") as f:
